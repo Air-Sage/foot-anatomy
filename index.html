@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f5f7f6" />
+    <meta
+      name="description"
+      content="探索足踝与下肢骨骼、肌肉、韧带和神经血管的三维空间关系。"
+    />
+    <title>足踝解剖图谱 · Anatomy Atlas</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./style.css?v=20260915-3" />
+    <script src="./assets/lucide.min.js"></script>
+  </head>
+  <body>
+    <main class="app-shell" aria-label="足踝解剖图谱">
+      <header class="app-header">
+        <div class="brand">
+          <span class="brand-mark"><i data-lucide="footprints"></i></span>
+          <div>
+            <h1>足踝解剖图谱</h1>
+            <span>Anatomy Atlas</span>
+          </div>
+        </div>
+        <div class="header-context">
+          <span class="status-dot"></span>右下肢<span class="divider"></span
+          >解剖工作台
+        </div>
+        <div class="header-actions">
+          <button
+            class="icon-button"
+            id="navToggle"
+            type="button"
+            title="结构导航"
+            aria-label="结构导航"
+            aria-expanded="true"
+          >
+            <i data-lucide="panel-left"></i>
+          </button>
+          <button
+            class="icon-button"
+            id="detailToggle"
+            type="button"
+            title="部位详情"
+            aria-label="部位详情"
+            aria-expanded="true"
+          >
+            <i data-lucide="panel-right"></i>
+          </button>
+          <span class="divider"></span>
+          <button
+            class="icon-button"
+            id="captureButton"
+            type="button"
+            title="导出模型图片"
+            aria-label="导出模型图片"
+          >
+            <i data-lucide="download"></i>
+          </button>
+        </div>
+      </header>
+      <aside class="anatomy-nav" aria-label="解剖结构导航">
+        <div class="panel-heading">
+          <h2>结构导航</h2>
+          <span id="structureCount" class="count">载入中</span>
+        </div>
+        <label class="search-field"
+          ><i data-lucide="search"></i
+          ><input
+            id="structureSearch"
+            type="search"
+            placeholder="搜索部位 / English"
+            aria-label="搜索解剖部位"
+            autocomplete="off"
+        /></label>
+        <div class="layer-section">
+          <div class="section-heading">
+            组织层级<span id="layerCount">9 / 9</span>
+          </div>
+          <div
+            class="layer-switch"
+            role="group"
+            aria-label="结构类型显示开关"
+          ></div>
+        </div>
+        <div class="list-heading">
+          <span>解剖结构</span
+          ><button
+            class="icon-button small"
+            id="foldGroupsButton"
+            type="button"
+            title="展开所有分组"
+            aria-label="展开所有分组"
+          >
+            <i data-lucide="list-minus"></i>
+          </button>
+        </div>
+        <div
+          class="structure-stack"
+          id="structureList"
+          aria-label="结构列表"
+        ></div>
+        <p id="searchEmpty" class="search-empty" hidden>没有匹配的解剖结构</p>
+        <div class="nav-footer">
+          <button
+            class="text-button"
+            id="restoreHiddenButton"
+            type="button"
+            disabled
+          >
+            <i data-lucide="eye"></i><span>恢复隐藏</span></button
+          ><span id="hiddenCount">0 个隐藏</span>
+        </div>
+      </aside>
+      <section class="viewport" aria-label="三维解剖视图">
+        <div id="canvasHost" class="canvas-host"></div>
+        <div class="viewport-topbar">
+          <div
+            class="segmented region-switch"
+            role="group"
+            aria-label="观察区域"
+          >
+            <button
+              type="button"
+              data-region="foot"
+              class="is-active"
+              aria-pressed="true"
+            >
+              足踝</button
+            ><button type="button" data-region="limb" aria-pressed="false">
+              全下肢
+            </button>
+          </div>
+          <div class="viewport-options">
+            <label class="view-select"
+              ><i data-lucide="box"></i
+              ><select id="viewPreset" aria-label="观察角度">
+                <option value="perspective">立体视角</option>
+                <option value="front">前面观</option>
+                <option value="back">后面观</option>
+                <option value="medial">内侧观</option>
+                <option value="lateral">外侧观</option>
+                <option value="plantar">足底观</option>
+              </select></label
+            >
+            <button
+              class="icon-button"
+              id="renderSettingsButton"
+              type="button"
+              title="渲染设置"
+              aria-label="渲染设置"
+              aria-expanded="false"
+            >
+              <i data-lucide="sliders-horizontal"></i>
+            </button>
+          </div>
+        </div>
+        <div class="render-settings" id="renderSettings" hidden>
+          <div class="panel-heading">
+            <h3>渲染设置</h3>
+            <i data-lucide="sun"></i>
+          </div>
+          <label class="range-label" for="exposureControl"
+            >曝光<output id="exposureValue">1.00</output></label
+          ><input
+            id="exposureControl"
+            type="range"
+            min="0.65"
+            max="1.4"
+            step="0.05"
+            value="1"
+          />
+          <label class="range-label" for="fillControl"
+            >环境补光<output id="fillValue">100%</output></label
+          ><input
+            id="fillControl"
+            type="range"
+            min="0.5"
+            max="1.6"
+            step="0.1"
+            value="1"
+          />
+          <label class="switch-label"
+            >接触阴影<input
+              id="aoControl"
+              type="checkbox"
+              checked
+              role="switch"
+          /></label>
+          <button id="resetRenderButton" class="text-button" type="button">
+            <i data-lucide="rotate-ccw"></i>重置渲染
+          </button>
+        </div>
+        <div class="load-state" id="loadState" role="status">
+          <i data-lucide="loader-circle" class="loading-icon"></i
+          ><strong id="loadTitle">正在加载解剖模型</strong
+          ><span id="loadProgress">准备组织纹理</span
+          ><button
+            id="retryLoadButton"
+            type="button"
+            class="primary-button"
+            hidden
+          >
+            重新加载
+          </button>
+        </div>
+        <div class="viewport-caption">
+          <span id="regionCaption">足与踝</span
+          ><span id="viewCaption">右侧 · 立体视角</span>
+        </div>
+        <div class="view-tools" role="toolbar" aria-label="视图控制">
+          <div class="segmented tool-modes">
+            <button
+              class="icon-button is-active"
+              id="rotateModeButton"
+              type="button"
+              title="旋转"
+              aria-label="旋转"
+              aria-pressed="true"
+            >
+              <i data-lucide="rotate-3d"></i></button
+            ><button
+              class="icon-button"
+              id="panModeButton"
+              type="button"
+              title="平移"
+              aria-label="平移"
+              aria-pressed="false"
+            >
+              <i data-lucide="move"></i>
+            </button>
+          </div>
+          <span class="divider"></span>
+          <button
+            class="icon-button"
+            id="xrayModeButton"
+            type="button"
+            title="透视"
+            aria-label="透视"
+            aria-pressed="false"
+          >
+            <i data-lucide="scan"></i>
+          </button>
+          <button
+            class="icon-button"
+            id="focusButton"
+            type="button"
+            title="适应视图"
+            aria-label="适应视图"
+          >
+            <i data-lucide="focus"></i>
+          </button>
+          <span class="divider"></span>
+          <button
+            class="icon-button"
+            id="explodeAllButton"
+            type="button"
+            title="展开结构"
+            aria-label="展开结构"
+          >
+            <i data-lucide="layers-3"></i>
+          </button>
+          <button
+            class="icon-button"
+            id="collapseButton"
+            type="button"
+            title="合拢结构"
+            aria-label="合拢结构"
+          >
+            <i data-lucide="layers-2"></i>
+          </button>
+        </div>
+        <div class="viewport-status">
+          <span class="status-dot"></span><span id="visibleCount">载入中</span>
+        </div>
+      </section>
+      <aside class="detail-panel" aria-label="部位说明">
+        <div class="panel-heading">
+          <h2>部位详情</h2>
+          <button
+            class="icon-button small"
+            id="resetSelection"
+            type="button"
+            title="取消选择"
+            aria-label="取消选择"
+          >
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="detail-content" aria-live="polite">
+          <div class="detail-kicker">
+            <span class="layer-badge" id="layerBadge">图谱概览</span
+            ><span id="selectionState">未选择</span>
+          </div>
+          <h2 id="partTitle">足与踝</h2>
+          <p id="partSummary">
+            骨性支架、软组织和神经血管共同构成足踝的解剖结构。
+          </p>
+          <div class="detail-actions">
+            <button
+              class="primary-button"
+              id="toggleExtractButton"
+              type="button"
+              disabled
+            >
+              <i data-lucide="move-up-right"></i><span>抽出部位</span></button
+            ><button
+              class="secondary-button"
+              id="hidePartButton"
+              type="button"
+              disabled
+            >
+              <i data-lucide="eye-off"></i><span>隐藏</span>
+            </button>
+          </div>
+          <dl class="fact-grid">
+            <div>
+              <dt><i data-lucide="activity"></i>主要作用</dt>
+              <dd id="partRole"></dd>
+            </div>
+            <div>
+              <dt><i data-lucide="map-pin"></i>位置关系</dt>
+              <dd id="partLocation"></dd>
+            </div>
+          </dl>
+          <section class="notes-block">
+            <h3>解剖信息</h3>
+            <ul id="partNotes"></ul>
+          </section>
+        </div>
+        <div class="detail-footer">
+          <i data-lucide="book-open"></i
+          ><span
+            >AnatomyTOOL · Open3DModel<br /><small>右下肢解剖图谱</small></span
+          >
+        </div>
+      </aside>
+      <footer class="app-footer">
+        <span
+          ><span class="status-dot"></span
+          ><span id="modelStatus">模型载入中</span></span
+        ><a
+          href="./assets/open3dmodel/ATTRIBUTION.md"
+          target="_blank"
+          rel="noopener"
+          >AnatomyTOOL Open3DModel · CC BY-SA 4.0</a
+        >
+      </footer>
+      <div id="tooltip" class="tooltip" role="status"></div>
+      <div id="toast" class="toast" role="status" hidden></div>
+    </main>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="./main.js?v=20260915-4"></script>
+  </body>
+</html>
